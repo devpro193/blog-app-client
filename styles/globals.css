@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input::-webkit-file-upload-button {
+  display: none;
+}
+
+[placeholder]:empty::before {
+  content: attr(placeholder);
+  color: #555;
+}
+
+[placeholder]:empty:focus::before {
+  content: "";
+}
+
+#edit a {
+  text-decoration-line: underline;
+  text-decoration-color: dodgerblue;
+  text-underline-offset: 4px;
+  transition: all 200ms ease-in-out;
+}
+
+#container a {
+  text-decoration-line: underline;
+  text-decoration-color: dodgerblue;
+  text-underline-offset: 4px;
+  transition: all 200ms ease-in-out;
+}
+
+* {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
