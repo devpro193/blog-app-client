@@ -63,6 +63,8 @@ export default function User({ data, cookies, user }) {
             <Head>
                 <title>{data?.username ? `${data.name} - Reader` : "User Not Found"}</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <meta property="og:image" content={data?.profile} />
+                <meta property="description" content={data?.about} />
             </Head>
             <m.main
                 animate={{ opacity: 1 }}

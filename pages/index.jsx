@@ -37,7 +37,10 @@ export default function Home({ data, people }) {
     <>
       <Head>
         <title>Reader - A place for ideas and wisdom</title>
+        <meta name="description" content="Explore a world of knowledge and inspiration on our blog app homepage. Discover engaging articles, insightful stories, and a community of passionate writers. Dive into a realm of ideas and creativity today." />
+        <meta name="og:description" content="Explore a world of knowledge and inspiration on our blog app homepage. Discover engaging articles, insightful stories, and a community of passionate writers. Dive into a realm of ideas and creativity today." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta property="og:image" content="https://blog-app-client-ivory.vercel.app/logo.jpg" />
       </Head>
       <m.main
         animate={{ opacity: 1 }}
