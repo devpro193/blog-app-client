@@ -116,7 +116,7 @@ export default function User({ data, cookies, user }) {
 
                 <div className="flex w-full flex-col py-2 px-4 xl:px-16 gap-3 min-h-[100px]">
                     <span className={`${jose.className} text-2xl xl:text-3xl`}>Published Articles</span>
-                    <div className="flex flex-wrap w-full max-xl:flex-col">
+                    <div className="grid md:grid-cols-2 gap-2 lg:grid-cols-3">
                         {data.articles?.length > 0 ? data.articles.map(e => {
                             return (
                                 <ArticleCard key={e._id} title={e.title} des={e.description} img={e.cover} date={e.createdAt} link={`/user/${data.username}/${e.permalink}`} />

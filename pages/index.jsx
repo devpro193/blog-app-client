@@ -5,29 +5,33 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { motion as m } from "framer-motion"
+import { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 
-export async function getServerSideProps(ctx) {
+export const getStaticProps = async (ctx) => {
 
   const data = await fetch(`${process.env.SERVER_URL}/article?limit=5`).then(res => res.json())
-  const latestData = await fetch(`${process.env.SERVER_URL}/article/latest`).then(res => res.json())
   const people = await fetch(`${process.env.SERVER_URL}/user?limit=3`).then(res => res.json())
 
   return {
     props: {
       data,
       people,
-      latestData,
-      cookies: ctx.req.cookies,
     }
   }
 }
 
-export default function Home({ data, people, cookies, latestData }) {
-  let clientCookie = cookies?.data
-  let serverCookie = cookies?.parallelVortex
-  if (clientCookie) clientCookie = JSON.parse(cookies?.data)
+export default function Home({ data, people }) {
+  const [cookies, setCookie] = useCookies(["data","parallelVortex","parallel"])
 
+  const [latestData, setLatestData] = useState([])
   Refesh(cookies?.parallelVortex, cookies?.parallel)
+
+  useEffect(() => {
+    fetch(`${process.env.SERVER_URL}/article/latest`).then(res => res.json()).then(res => {
+      setLatestData(res)
+    })
+  })
 
   return (
     <>
@@ -117,21 +121,30 @@ export default function Home({ data, people, cookies, latestData }) {
 
           <div className="flex flex-col gap-4">
             <label className={`${jose.className} text-2xl my-2`}>Latest Posts</label>
-
-            {latestData ? latestData.map(e => {
-              let date = new Date(e?.createdAt || "2012").toString().split(" ")
-              return (<Link key={e._id} href={`/user/${e?.author.username}/${e.permalink}`}><div className="lg:hover:-translate-y-0.5 transition-all duration-200 flex gap-2 lg:max-w-sm ">
+            <div className="flex flex-col md:grid md:grid-cols-2 gap-3 xl:grid-cols-1">
+              {latestData.length > 0 ? latestData.map(e => {
+                let date = new Date(e?.createdAt || "2012").toString().split(" ")
+                return (<Link key={e._id} href={`/user/${e?.author.username}/${e.permalink}`}><div className="lg:hover:-translate-y-0.5 transition-all duration-200 flex gap-2 xl:max-w-sm ">
+                  <div className="relative shrink-0 shadow-md w-36 h-36 rounded-md overflow-hidden bg-zinc-100">
+                    <Image className="object-cover flex-1" loader={() => e?.cover} src={e?.cover} fill />
+                  </div>
+                  <section className="flex flex-col">
+                    <span className={`${jose.className} text-xl line-clamp-2 leading-6`}>{e.title}</span>
+                    <span className={`${jose.className} text-sm text-zinc-500`}>{`${date[1]} ${date[2]}`}</span>
+                    <p className={`line-clamp-2`}>{e.description}</p>
+                    <span className="py-1 flex gap-1 text-zinc-600 text-sm font-semibold"><Image loader={() => e.author.profile} src={e.author.profile} className="rounded-full object-cover" width={20} height={20} />{e.author.name}</span>
+                  </section>
+                </div></Link>)
+              }) : <><div className="lg:hover:-translate-y-0.5 transition-all duration-200 flex gap-2 lg:max-w-sm animate-pulse">
                 <div className="relative shrink-0 shadow-md w-36 h-36 rounded-md overflow-hidden bg-zinc-100">
-                  <Image className="object-cover flex-1" loader={() => e?.cover} src={e?.cover} fill />
                 </div>
                 <section className="flex flex-col">
-                  <span className={`${jose.className} text-xl line-clamp-2 leading-6`}>{e.title}</span>
-                  <span className={`${jose.className} text-sm text-zinc-500`}>{`${date[1]} ${date[2]}`}</span>
-                  <p className={`line-clamp-2`}>{e.description}</p>
-                  <span className="py-1 flex gap-1 text-zinc-600 text-sm font-semibold"><Image loader={() => e.author.profile} src={e.author.profile} className="rounded-full object-cover" width={20} height={20} /> {e.author.name}</span>
+                  <span className={`${jose.className} text-xl line-clamp-2 leading-6`}>Fetching Title</span>
+                  <p className={`line-clamp-2`}>Fetching Description</p>
+                  <span className="py-1 flex gap-1 text-zinc-600 text-sm font-semibold">Fetching Author Name</span>
                 </section>
-              </div></Link>)
-            }) : <></>}
+              </div></>}
+            </div>
           </div>
 
         </div>

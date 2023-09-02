@@ -51,13 +51,20 @@ export default function UserLog({ state }) {
                                 // console.log(response.data);
                                 popUp(response?.data?.message);
                                 // console.log(response)
-                                setCookie("data", JSON.stringify({
+                                setCookie("data", {
                                     name: response?.data?.name,
                                     username: response?.data?.username,
                                     email: response?.data?.email,
                                     profile: response?.data?.profile
-                                }), {
+                                }, {
                                     maxAge: 30 * 24 * 60 * 60
+                                })
+
+                                setCookie("parallelVortex", response.data?.parallelVortex,{
+                                    maxAge: 30 * 24 * 60 * 60
+                                })
+                                setCookie("parallel", response.data?.parallel,{
+                                    maxAge: 60 * 60
                                 })
                                 router.reload()
                             })

@@ -1,5 +1,4 @@
 import { jose } from "@/components/Fonts";
-import { popUp } from "@/components/Modal";
 import { Refesh } from "@/components/Refesh";
 import Unaccess from "@/components/Unaccess";
 import axios from "axios";
@@ -7,7 +6,7 @@ import { motion as m } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 // import { useCookies } from "react-cookie";
 
 export async function getServerSideProps(ctx) {
@@ -63,7 +62,7 @@ export default function Draft({ data, userData }) {
 
                 <div className="flex gap-3 py-3 flex-wrap">
                     {liked.length > 0 ? liked.map(e => {
-                        return (<span key={e._id} id={e._id} className="relative flex flex-col gap-3 p-1 bg-zinc-100 rounded-md overflow-hidden xl:w-[48%]">
+                        return (<span key={e._id} id={e._id} className="relative flex flex-col gap-3 p-1 bg-zinc-100 rounded-md overflow-hidden xl:w-[48%] w-full">
                             <div className="flex justify-center-center gap-2">
                                 <Link href={`/user/${e.author.username}/${e.permalink}`}>
                                     <div className="shrink-0 relative grid place-items-center overflow-hidden h-full xl:w-40 w-32 rounded-md bg-slate-200">

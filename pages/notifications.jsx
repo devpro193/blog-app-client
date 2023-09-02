@@ -4,7 +4,6 @@ import Unaccess from "@/components/Unaccess";
 import axios from "axios";
 import { motion as m } from "framer-motion";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 

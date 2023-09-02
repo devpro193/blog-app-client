@@ -100,7 +100,7 @@ export default function Dashboard({ data, userData }) {
     const ArticleCard = (id, img, title, date, des, link) => {
         date = new Date(date).toString().split(" ")
         return (
-            <div id={id} className="relative flex flex-col gap-3 lg:w-[400px] w-full rounded-md p-2">
+            <div id={id} className="relative flex flex-col gap-3 w-full rounded-md p-2">
                 <div className="z-10 opacity-0 pointer-events-none flex flex-col gap-2 items-center justify-center absolute h-full w-full bg-slate-100 bg-opacity-40 backdrop-blur-[2px] transition-all duration-300">
                     <span className="text-xl font-bold">Are you sure ?</span>
                     <section className="flex gap-1">
@@ -221,7 +221,7 @@ export default function Dashboard({ data, userData }) {
 
                     <div className="flex flex-col gap-2 w-full">
                         <span className={`${jose.className} text-2xl`}>Published Articles</span>
-                        <section className="flex flex-wrap gap-2">
+                        <section className="grid md:grid-cols-2 gap-1 lg:grid-cols-3 xl:grid-cols-4">
                             {userData?.articles?.length > 0 ? userData.articles.map(e => {
                                 return (
                                     ArticleCard(e._id, e.cover, e.title, e.createdAt, e.description, `/user/${userData.username}/${e.permalink}`)

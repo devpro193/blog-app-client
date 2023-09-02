@@ -12,14 +12,13 @@ import { GoogleLogin } from '@react-oauth/google';
 
 export default function Header() {
   const [profile, setProfile] = useState(false)
+  const [cookie, setCookie, removeCookie] = useCookies(["data", "parallelVortex"])
   const router = useRouter();
-  const [cookie, setCookie] = useCookies(["data"])
 
   const [hide, setHide] = useState(true)
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
-    <script src="https://accounts.google.com/gsi/client" async></script>
     setProfile(cookie.data?.profile)
 
     if (!profile) {
@@ -52,13 +51,19 @@ export default function Header() {
       }
     }).then(res => {
       popUp(res.data.message)
-      setCookie("data", JSON.stringify({
+      setCookie("data", {
         name: res?.data?.name,
         username: res?.data?.username,
         email: res?.data?.email,
         profile: res?.data?.profile
-      }), {
+      }, {
         maxAge: 30 * 24 * 60 * 60
+      })
+      setCookie("parallelVortex", res.data?.parallelVortex, {
+        maxAge: 30 * 24 * 60 * 60
+      })
+      setCookie("parallel", res.data?.parallel, {
+        maxAge: 60 * 60
       })
       res.data?.newUser ? window.location.replace("/edit-profile") : router.reload()
     }).catch(err => {
@@ -95,7 +100,7 @@ export default function Header() {
             {notifications.map(e => {
               let date = new Date(e?.createdAt || "2012").toString().split(" ")
               if (e?.notificationType == "follow") {
-                return <Link href={`/user/${e.user.username}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
+                return <Link key={e.user.name} href={`/user/${e.user.username}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
                   <span className="p-2 bg-lime-50 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 stroke-lime-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -108,7 +113,7 @@ export default function Header() {
                 </Link>
               }
               if (e?.notificationType == "liked") {
-                return <Link href={`/user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
+                return <Link key={e.user.name} href={`/user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
                   <span className="p-2 bg-red-50 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 stroke-red-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -122,7 +127,7 @@ export default function Header() {
               }
 
               if (e?.notificationType == "comment") {
-                return <Link href={`/user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
+                return <Link key={e.user.name} href={`/user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
                   <span className="p-2 bg-purple-50 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 stroke-purple-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
@@ -142,23 +147,44 @@ export default function Header() {
 
         {profile ? <span className="relative group rounded-full border border-zinc-600 p-[1px]">
           <Link href={"/dashboard"}>
-            <div className="relative overflow-hidden h-8 w-8 rounded-full">
+            <div className="select-none relative overflow-hidden h-8 w-8 rounded-full">
               <Image className="object-cover" loader={() => profile} src={profile} fill />
             </div>
           </Link>
           <div className="absolute max-xl:hidden pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-1 z-10 w-40 -left-14 bg-zinc-200 shadow-md rounded-md transition-all duration-200 translate-y-5 p-1">
-            <Link href={"/logout"} className="bg-zinc-800 flex justify-start gap-2 px-3 hover:bg-zinc-900 transition-colors duration-150 text-white text-center font-semibold py-1 w-full rounded-md"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-            </svg>Logout</Link>
+            <button onClick={() => {
+              console.log(cookie?.parallelVortex);
+              axios.request({
+                method: "POST",
+                url: `${process.env.SERVER_URL}/logout`,
+                maxBodyLength: Infinity,
+                headers: {
+                  'Authorization': `Bearer ${cookie?.parallelVortex}`
+                }
+              }).then(res => {
+                removeCookie("data")
+                removeCookie("parallelVortex")
+                removeCookie("parallel")
+                popUp("Logged Out")
+                setTimeout(() => {
+                  window.location.replace("/")
+                }, 200);
+              }).catch(err => {
+                console.log(err);
+                popUp(err.message + " " + err.statusText)
+              })
+            }} className="bg-zinc-800 flex justify-start gap-2 px-3 hover:bg-zinc-900 transition-colors duration-150 text-white text-center font-semibold py-1 w-full rounded-md"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+              </svg>Logout</button>
           </div>
         </span> :
 
           <>            <GoogleLogin type="icon" size='medium' theme="filled_black" shape="circle"
-              onSuccess={handleCallbackResponse}
-              onError={() => {
-                console.log('Login Failed');
-              }}
-            />
+            onSuccess={handleCallbackResponse}
+            onError={() => {
+              console.log('Login Failed');
+            }}
+          />
 
             <svg onClick={() => {
               unrevel()
@@ -202,12 +228,31 @@ export default function Header() {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0012 2.25z" />
           </svg>Password</Link>
-        <span className="mt-auto mb-1 lg:mb-5">
-          <Link onClick={(e) => { if (!profile) e.preventDefault(), unrevel() }} href={"/logout"} className="flex justify-center gap-2 px-3 rounded bg-zinc-800 text-white text-lg p-3 w-full lg:hover:bg-zinc-100 lg:hover:shadow-md lg:hover:text-zinc-900 lg:hover:border-zinc-900 border transition-all duration-150">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
-            </svg>Logout</Link>
-        </span>
+        <button onClick={() => {
+          if (!profile) return unrevel()
+          axios.request({
+            method: "POST",
+            url: `${process.env.SERVER_URL}/logout`,
+            maxBodyLength: Infinity,
+            headers: {
+              'Authorization': `Bearer ${cookie?.parallelVortex}`
+            }
+          }).then(res => {
+            removeCookie("data")
+            removeCookie("parallelVortex")
+            removeCookie("parallel")
+            popUp("Logged Out")
+            setTimeout(() => {
+              window.location.replace("/")
+            }, 200);
+          }).catch(err => {
+            console.log(err);
+            popUp(err.message + " " + err.statusText)
+          })
+        }} className={`justify-center gap-2 px-3 rounded text-white text-lg p-3 w-full lg:hover:bg-zinc-100 lg:hover:shadow-md ${profile ? "flex bg-zinc-800 lg:hover:text-zinc-900 lg:hover:border-zinc-900" : "hidden"} border transition-all duration-150 mt-auto mb-1 lg:mb-5`}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+          </svg>{profile ? "Logout" : "Login"}</button>
       </div>
       <div onClick={() => { sidebar() }} className="flex-1 transition-all duration-300 "></div>
     </div >

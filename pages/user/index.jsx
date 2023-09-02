@@ -1,14 +1,11 @@
 import { jose } from "@/components/Fonts";
-import { popUp } from "@/components/Modal";
 import { Refesh } from "@/components/Refesh";
-import Unaccess from "@/components/Unaccess";
 import axios from "axios";
 import { motion as m } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-// import { useCookies } from "react-cookie";
+import { useState } from "react";
 
 export async function getServerSideProps(ctx) {
   let userData = null;
@@ -23,18 +20,12 @@ export async function getServerSideProps(ctx) {
 
   return {
     props: {
-      data: ctx.req.cookies,
       userData,
     },
   };
 }
 
-export default function Draft({ data, userData }) {
-  let clientCookie = data?.data;
-  let serverCookie = data?.parallelVortex;
-  if (clientCookie) clientCookie = JSON.parse(data?.data);
-
-  Refesh(data?.parallelVortex, data?.parallel);
+export default function Draft({ userData }) {
 
   const [users, setUsers] = useState(userData || []);
 
@@ -63,7 +54,7 @@ export default function Draft({ data, userData }) {
           <p>All those newly joined users</p>
         </section>
 
-        <div className="flex gap-3 py-3 flex-wrap">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 py-3">
           {users.length > 0 &&
             users.map((e) => {
               let date = new Date(e?.createdAt || "2012").toString().split(" ")

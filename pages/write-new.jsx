@@ -7,7 +7,7 @@ import Head from "next/head"
 import Image from "next/image";
 import { useEffect, useState } from "react"
 
-export async function getServerSideProps({ params, req }) {
+export async function getServerSideProps({ req }) {
 
   return {
     props: {
@@ -16,7 +16,7 @@ export async function getServerSideProps({ params, req }) {
   }
 }
 
-export default function Writenew({ cookies, }) {
+export default function Writenew({ cookies }) {
   let clientCookie = cookies?.data
   let serverCookie = cookies?.parallelVortex
   if (clientCookie) clientCookie = JSON.parse(cookies?.data)

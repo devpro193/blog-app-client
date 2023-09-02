@@ -8,7 +8,9 @@ import { motion as m } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 
 export async function getServerSideProps({ params, req }) {
 
@@ -18,20 +20,24 @@ export async function getServerSideProps({ params, req }) {
   return {
     props: {
       data,
-      cookies: req.cookies,
-      user: params.user
     }
   }
 }
 
-export default function Articles({ data, cookies, user }) {
-  let clientCookie = cookies?.data
-  let serverCookie = cookies?.parallelVortex
-  if (clientCookie) clientCookie = JSON.parse(cookies?.data)
+export default function Articles({ data }) {
+  const [cookie, setCookie] = useCookies(["data", "parallelVortex", "parallel"])
+  const [clientCookie, setClintCookie] = useState(false)
+  const [serverCookie, setServerCookie] = useState(false)
+  Refesh(cookie?.parallelVortex, cookie?.parallel)
 
-  Refesh(cookies?.parallelVortex, cookies?.parallel)
+  const searchParams = useSearchParams()
+  const user = searchParams.get('user')
 
   useEffect(() => {
+    setClintCookie(cookie?.data?.username)
+    setServerCookie(cookie?.parallelVortex)
+    setLiked(data?.likes?.includes(cookie?.data?.username))
+    setFollowing(data?.author?.followers?.includes(cookie?.data?.username))
     if (data) document.getElementById("container").innerHTML = data?.body.join("")
     setUrl(window.location.href)
   }, [])
@@ -41,8 +47,8 @@ export default function Articles({ data, cookies, user }) {
   const [title, setTitle] = useState(data?.title)
   const [comments, setComments] = useState(data?.comments || [])
   const [likes, setLikes] = useState(data?.likes?.length || 0)
-  const [liked, setLiked] = useState(data?.likes?.includes(clientCookie?.username))
-  const [following, setFollowing] = useState(data?.author?.followers?.includes(clientCookie?.username))
+  const [liked, setLiked] = useState(false)
+  const [following, setFollowing] = useState(false)
   const [url, setUrl] = useState(null)
 
   const filter = new BadWordsFilter();
@@ -57,7 +63,7 @@ export default function Articles({ data, cookies, user }) {
       maxBodyLength: Infinity,
       url: `${process.env.SERVER_URL}/article/comment`,
       headers: {
-        'Authorization': `Bearer ${cookies?.parallel}`,
+        'Authorization': `Bearer ${cookie?.parallel}`,
       },
       data: {
         review, article
@@ -86,7 +92,7 @@ export default function Articles({ data, cookies, user }) {
       maxBodyLength: Infinity,
       url: `${process.env.SERVER_URL}/article/like/${data?._id}`,
       headers: {
-        'Authorization': `Bearer ${cookies?.parallel}`,
+        'Authorization': `Bearer ${cookie?.parallel}`,
       }
     }).then(res => {
       setLiked(!liked)
@@ -107,7 +113,7 @@ export default function Articles({ data, cookies, user }) {
       maxBodyLength: Infinity,
       url: `${process.env.SERVER_URL}/user/follow/${user}`,
       headers: {
-        'Authorization': `Bearer ${cookies?.parallel}`,
+        'Authorization': `Bearer ${cookie?.parallel}`,
       }
     }).then(res => {
       setFollowing(res.data?.state)
@@ -154,7 +160,7 @@ export default function Articles({ data, cookies, user }) {
                 <section className="flex flex-col">
                   <span className={`${jose.className} text-lg flex gap-2`}><Link href={`/user/${user}`}>{data?.author.name}</Link> <button onClick={() => {
                     follow()
-                  }} id="follow" className={`${following ? "text-opacity-70 text-zinc-600" : "text-blue-500"} ${clientCookie?.username == user ? "hidden" : "block"} text-base disabled:cursor-pointer disabled:opacity-30`}>• {following ? "Following" : "Follow"}</button></span>
+                  }} id="follow" className={`${following ? "text-opacity-70 text-zinc-600" : "text-blue-500"} ${clientCookie == user ? "hidden" : "block"} text-base disabled:cursor-pointer disabled:opacity-30`}>• {following ? "Following" : "Follow"}</button></span>
                   <span className={`text-zinc-400 text-sm`} >{`${date[1]} ${date[2]}, ${date[3]}`}</span>
                 </section>
               </section>
